@@ -750,6 +750,70 @@ public class RocksDB extends RocksObject {
   }
 
   /**
+   * Creates a new column family with the name columnFamilyName and
+   * import external SST files specified in `metadata` allocates a 
+   * ColumnFamilyHandle within an internal structure.
+   * The ColumnFamilyHandle is automatically disposed with DB disposal.
+   *
+   * @param columnFamilyDescriptor column family to be created.
+   * @return {@link org.rocksdb.ColumnFamilyHandle} instance.
+   *
+   * @throws RocksDBException thrown if error happens in underlying
+   *    native library.
+   */
+  public ColumnFamilyHandle createColumnFamilyWithImport(
+      final ColumnFamilyDescriptor columnFamilyDescriptor,
+      final ImportColumnFamilyOptions importColumnFamilyOptions, final List<ExportImportFilesMetaData> metadatas)
+      throws RocksDBException {
+
+    int metadataNum = metadatas.size();
+    final byte[][] dbComparatorNames = new byte[metadataNum][];
+    final int[] liveFileMetaDataSizes = new int[metadataNum];
+    final byte[][][] columnFamilyNames = new byte[metadataNum][][];
+    final int[][] levels = new int[metadataNum][];
+    final String[][] fileNames = new String[metadataNum][];
+    final String[][] paths = new String[metadataNum][];
+    final long[][] sizes = new long[metadataNum][];
+    final long[][] smallestSeqnos = new long[metadataNum][];
+    final long[][] largestSeqnos = new long[metadataNum][];
+    final byte[][][] smallestKeys = new byte[metadataNum][][];
+    final byte[][][] largestKeys = new byte[metadataNum][][];
+    final long[][] numReadsSampled = new long[metadataNum][];
+    final boolean[][] beingCompacted = new boolean[metadataNum][];
+    final long[][] numEntries = new long[metadataNum][];
+    final long[][] numDeletions = new long[metadataNum][];
+    for (int i = 0; i < metadataNum; i++) {
+      ExportImportFilesMetaData metadata = metadatas.get(i);
+      dbComparatorNames[i] = metadata.dbComparatorName();
+      int liveFileMetaDataSize = metadata.files().size();
+      liveFileMetaDataSizes[i] = liveFileMetaDataSize;
+      for (int j = 0; j < liveFileMetaDataSize; j++) {
+        LiveFileMetaData liveFileMetaData = metadata.files().get(j);
+          columnFamilyNames[i][j] = liveFileMetaData.columnFamilyName();
+          levels[i][j] = liveFileMetaData.level();
+          fileNames[i][j] = liveFileMetaData.fileName();
+          paths[i][j] = liveFileMetaData.path();
+          sizes[i][j] = liveFileMetaData.size();
+          smallestSeqnos[i][j] = liveFileMetaData.smallestSeqno();
+          largestSeqnos[i][j] = liveFileMetaData.largestSeqno();
+          smallestKeys[i][j] = liveFileMetaData.smallestKey();
+          largestKeys[i][j] = liveFileMetaData.largestKey();
+          numReadsSampled[i][j] = liveFileMetaData.numReadsSampled();
+          beingCompacted[i][j] = liveFileMetaData.beingCompacted();
+          numEntries[i][j] = liveFileMetaData.numEntries();
+          numDeletions[i][j] = liveFileMetaData.numDeletions();
+      }
+    }
+    final ColumnFamilyHandle columnFamilyHandle = new ColumnFamilyHandle(this,
+      createColumnFamilyWithImport(nativeHandle_, columnFamilyDescriptor.getName(),
+            columnFamilyDescriptor.getName().length,
+            columnFamilyDescriptor.getOptions().nativeHandle_, importColumnFamilyOptions.nativeHandle_, metadataNum, dbComparatorNames, liveFileMetaDataSizes, columnFamilyNames, levels,
+            fileNames, paths, sizes, smallestSeqnos, largestSeqnos, smallestKeys, largestKeys, numReadsSampled, beingCompacted, numEntries, numDeletions));
+    ownedColumnFamilyHandles.add(columnFamilyHandle);
+    return columnFamilyHandle;
+  }
+
+  /**
    * Drops the column family specified by {@code columnFamilyHandle}. This call
    * only records a drop record in the manifest and prevents the column
    * family from flushing and compacting.
@@ -4394,6 +4458,12 @@ public class RocksDB extends RocksObject {
   private native long[] createColumnFamilies(
       final long handle, final long[] columnFamilyOptionsHandles, final byte[][] columnFamilyNames)
       throws RocksDBException;
+  private native long createColumnFamilyWithImport(final long handle,
+      final byte[] columnFamilyName, final int columnFamilyNamelen,
+      final long columnFamilyOptions, final long importColumnFamilyOptions, int metaNum, final byte[][] dbComparatorNames, final int[] liveFileMetaDataSizes, final byte[][][] columnFamilyNames, final int[][] levels,
+      final String[][] fileNames, final String[][] paths, final long[][] sizes, final long[][] smallestSeqnos, final long[][] largestSeqnos,
+      final byte[][][] smallestKeys, final byte[][][] largestKeys, final long[][] numReadsSampled, final boolean[][] beingCompacted, final long[][] numEntries, final long[][] numDeletions)
+        throws RocksDBException;
   private native void dropColumnFamily(
       final long handle, final long cfHandle) throws RocksDBException;
   private native void dropColumnFamilies(final long handle,

@@ -149,6 +149,7 @@ set(JAVA_MAIN_CLASSES
   src/main/java/org/rocksdb/EnvOptions.java
   src/main/java/org/rocksdb/EventListener.java
   src/main/java/org/rocksdb/Experimental.java
+  src/main/java/org/rocksdb/ExportImportFilesMetaData.java
   src/main/java/org/rocksdb/ExternalFileIngestionInfo.java
   src/main/java/org/rocksdb/Filter.java
   src/main/java/org/rocksdb/FileOperationInfo.java
