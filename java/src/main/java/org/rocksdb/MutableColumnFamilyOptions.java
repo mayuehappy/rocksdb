@@ -510,17 +510,6 @@ public class MutableColumnFamilyOptions extends AbstractMutableOptions {
     }
 
     @Override
-    public MutableColumnFamilyOptionsBuilder setPeriodicCompactionSeconds(
-        final long periodicCompactionSeconds) {
-      return setLong(CompactionOption.periodic_compaction_seconds, periodicCompactionSeconds);
-    }
-
-    @Override
-    public long periodicCompactionSeconds() {
-      return getLong(CompactionOption.periodic_compaction_seconds);
-    }
-
-    @Override
     public MutableColumnFamilyOptionsBuilder setEnableBlobFiles(final boolean enableBlobFiles) {
       return setBoolean(BlobOption.enable_blob_files, enableBlobFiles);
     }
