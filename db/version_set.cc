@@ -5118,12 +5118,6 @@ Status VersionSet::ProcessManifestWrites(
   assert(manifest_writers_.front() == &first_writer);
 
   autovector<VersionEdit*> batch_edits;
-  // This vector keeps track of the corresponding user-defined timestamp size
-  // for `batch_edits` side by side, which is only needed for encoding a
-  // `VersionEdit` that adds new SST files.
-  // Note that anytime `batch_edits` has new element added or get existing
-  // element removed, `batch_edits_ts_sz` should be updated too.
-  autovector<std::optional<size_t>> batch_edits_ts_sz;
   autovector<Version*> versions;
   autovector<const MutableCFOptions*> mutable_cf_options_ptrs;
   std::vector<std::unique_ptr<BaseReferencedVersionBuilder>> builder_guards;
@@ -5139,7 +5133,6 @@ Status VersionSet::ProcessManifestWrites(
     // No group commits for column family add or drop
     LogAndApplyCFHelper(first_writer.edit_list.front(), &max_last_sequence);
     batch_edits.push_back(first_writer.edit_list.front());
-    batch_edits_ts_sz.push_back(std::nullopt);
   } else {
     auto it = manifest_writers_.cbegin();
     size_t group_start = std::numeric_limits<size_t>::max();
@@ -5216,9 +5209,6 @@ Status VersionSet::ProcessManifestWrites(
         TEST_SYNC_POINT_CALLBACK("VersionSet::ProcessManifestWrites:NewVersion",
                                  version);
       }
-      const Comparator* ucmp = last_writer->cfd->user_comparator();
-      assert(ucmp);
-      std::optional<size_t> edit_ts_sz = ucmp->timestamp_size();
       for (const auto& e : last_writer->edit_list) {
         if (e->is_in_atomic_group_) {
           if (batch_edits.empty() || !batch_edits.back()->is_in_atomic_group_ ||
@@ -5239,7 +5229,6 @@ Status VersionSet::ProcessManifestWrites(
           return s;
         }
         batch_edits.push_back(e);
-        batch_edits_ts_sz.push_back(edit_ts_sz);
       }
     }
     for (int i = 0; i < static_cast<int>(versions.size()); ++i) {
@@ -5405,11 +5394,9 @@ Status VersionSet::ProcessManifestWrites(
 #ifndef NDEBUG
       size_t idx = 0;
 #endif
-      assert(batch_edits.size() == batch_edits_ts_sz.size());
-      for (size_t bidx = 0; bidx < batch_edits.size(); bidx++) {
-        auto& e = batch_edits[bidx];
+      for (auto& e : batch_edits) {
         std::string record;
-        if (!e->EncodeTo(&record, batch_edits_ts_sz[bidx])) {
+        if (!e->EncodeTo(&record)) {
           s = Status::Corruption("Unable to encode VersionEdit:" +
                                  e->DebugString(true));
           break;
@@ -6518,10 +6505,8 @@ Status VersionSet::WriteCurrentStateToManifest(
 
       edit.SetLastSequence(descriptor_last_sequence_);
 
-      const Comparator* ucmp = cfd->user_comparator();
-      assert(ucmp);
       std::string record;
-      if (!edit.EncodeTo(&record, ucmp->timestamp_size())) {
+      if (!edit.EncodeTo(&record)) {
         return Status::Corruption("Unable to Encode VersionEdit:" +
                                   edit.DebugString(true));
       }
