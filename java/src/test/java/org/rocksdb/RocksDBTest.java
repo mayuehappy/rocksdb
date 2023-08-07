@@ -547,6 +547,37 @@ public class RocksDBTest {
   }
 
   @Test
+  public void clipColumnFamily() throws RocksDBException {
+    try (final RocksDB db = RocksDB.open(dbFolder.getRoot().getAbsolutePath())) {
+      db.put("key1".getBytes(), "value".getBytes());
+      db.put("key2".getBytes(), "12345678".getBytes());
+      db.put("key3".getBytes(), "abcdefg".getBytes());
+      db.put("key4".getBytes(), "xyz".getBytes());
+      db.put("key5".getBytes(), "value5".getBytes());
+
+      assertThat(db.get("key1".getBytes())).isEqualTo("value".getBytes());
+      assertThat(db.get("key2".getBytes())).isEqualTo("12345678".getBytes());
+      assertThat(db.get("key3".getBytes())).isEqualTo("abcdefg".getBytes());
+      assertThat(db.get("key4".getBytes())).isEqualTo("xyz".getBytes());
+      assertThat(db.get("key5".getBytes())).isEqualTo("value5".getBytes());
+
+      db.clipColumnFamily(db.getDefaultColumnFamily(), "key2".getBytes(), "key5".getBytes());
+      System.err.println(db.get("key1".getBytes()));
+      System.err.println(db.get("key2".getBytes()));
+      System.err.println(db.get("key3".getBytes()));
+      System.err.println(db.get("key4".getBytes()));
+      System.err.println(db.get("key5".getBytes()));
+
+      assertThat(db.get("key1".getBytes())).isNull();
+      assertThat(db.get("key2".getBytes())).isEqualTo("12345678".getBytes());
+      assertThat(db.get("key3".getBytes())).isEqualTo("abcdefg".getBytes());
+      assertThat(db.get("key4".getBytes())).isEqualTo("xyz".getBytes());
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  @Test
   public void getIntProperty() throws RocksDBException {
     try (
         final Options options = new Options()
