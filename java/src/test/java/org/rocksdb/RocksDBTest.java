@@ -547,6 +547,26 @@ public class RocksDBTest {
   }
 
   @Test
+  public void clipColumnFamily() throws RocksDBException {
+    try (final RocksDB db = RocksDB.open(dbFolder.getRoot().getAbsolutePath())) {
+      db.put("key1".getBytes(), "value".getBytes());
+      db.put("key3".getBytes(), "12345678".getBytes());
+      db.put("key5".getBytes(), "abcdefg".getBytes());
+      db.put("key7".getBytes(), "xyz".getBytes());
+      db.put("key9".getBytes(), "value5".getBytes());
+
+      db.clipColumnFamily(db.getDefaultColumnFamily(), "key2".getBytes(), "key8".getBytes());
+
+      assertThat(db.get("key1".getBytes())).isNull();
+      assertThat(db.get("key2".getBytes())).isEqualTo("12345678".getBytes());
+      assertThat(db.get("key3".getBytes())).isEqualTo("abcdefg".getBytes());
+      assertThat(db.get("key4".getBytes())).isEqualTo("xyz".getBytes());
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  @Test
   public void getIntProperty() throws RocksDBException {
     try (
         final Options options = new Options()
