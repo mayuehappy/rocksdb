@@ -26,15 +26,15 @@ function deploy() {
   FILE=$1
   CLASSIFIER=$2
   echo "Deploying file=${FILE} with classifier=${CLASSIFIER} to sonatype with prefix=${PREFIX}"
-  sonatype_user="${USER}" sonatype_pw="${PASSWORD}" mvn gpg:sign-and-deploy-file \
+  sonatype_user="mayuehappy" sonatype_pw="mayueFight2021&" mvn gpg:sign-and-deploy-file \
    --settings java/deploysettings.xml \
-   -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ \
-   -DrepositoryId=sonatype-nexus-staging \
+   -Durl=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
+   -DrepositoryId=ossrh \
    -DpomFile=${PREFIX}.pom \
    -Dfile=$FILE \
    -Dclassifier=$CLASSIFIER \
-   -Dgpg.keyname="${KEYNAME}"  \
-   -Dgpg.passphrase="${PASSPHRASE}"
+   -Dgpg.keyname="90F3B2B6CCCF33C966AEF3CA172ED9D726BA0EE5"  \
+   -Dgpg.passphrase="mayueFight2021"
 }
 
 PREFIX=java/target/frocksdb-release/frocksdbjni-${VERSION}
