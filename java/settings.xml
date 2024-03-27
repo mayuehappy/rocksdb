@@ -1,0 +1,45 @@
+<settings>
+<profiles>
+   <profile>
+     <id>bytedance-repos</id>
+     <repositories>
+        <repository>
+            <id>bytedance-snapshots</id>
+            <url>http://maven.byted.org/repository/snapshots</url>
+	    <snapshots>
+		 <enabled>true</enabled>
+	    	<updatePolicy>always</updatePolicy>
+	    </snapshots>
+        </repository>
+        <repository>
+            <id>bytedance-releases</id>
+            <url>http://maven.byted.org/repository/releases</url>
+        </repository>
+    </repositories>
+   </profile>
+ </profiles>
+ 
+ <activeProfiles>
+   <activeProfile>bytedance-repos</activeProfile>
+ </activeProfiles>
+  <servers>
+    <server>
+      <id>bytedance-snapshots</id>
+      <username>deploy</username>
+      <password>bytedance123</password>
+    </server>
+    <server>
+      <id>bytedance-releases</id>
+      <username>deploy</username>
+      <password>bytedance123</password>
+    </server>
+  </servers>
+  <mirrors>
+    <mirror>
+      <id>bytedance-mirror</id>
+      <mirrorOf>*</mirrorOf>
+      <url>http://maven.byted.org/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>
+

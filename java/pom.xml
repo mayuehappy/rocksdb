@@ -4,7 +4,7 @@
 
     <groupId>com.ververica</groupId>
     <artifactId>frocksdbjni</artifactId>
-    <version>8.10.0-ververica-8.10.0</version>  <!-- this will be replaced by the Makefile's rocksdbjavageneratepom target -->
+    <version>8.10.0-ververica-1.0-nexmark</version>  <!-- this will be replaced by the Makefile's rocksdbjavageneratepom target -->
 
     <name>RocksDB JNI</name>
     <description>RocksDB fat jar with modifications specific for Apache Flink that contains .so files for linux32 and linux64 (glibc and musl-libc), jnilib files
